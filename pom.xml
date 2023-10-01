@@ -19,7 +19,7 @@
         <module>product-service</module>
         <module>order-service</module>
         <module>inventory-service</module>
-<!--        <module>discovery-server</module>-->
+        <module>discovery-server</module>
 <!--        <module>api-gateway</module>-->
 <!--        <module>notification-service</module>-->
     </modules>
@@ -87,14 +87,14 @@
                         <image>microservices-tutorial/${project.artifactId}</image>
                     </to>
                 </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>dockerBuild</goal>
-                        </goals>
-                    </execution>
-                </executions>
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>dockerBuild</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
             </plugin>
         </plugins>
     </build>
