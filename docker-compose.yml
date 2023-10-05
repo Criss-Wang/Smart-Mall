@@ -60,7 +60,7 @@ services:
   keycloak:
     platform: linux/x86_64/v8
     container_name: keycloak
-    image: quay.io/keycloak/keycloak:18.0.0
+    image: quay.io/keycloak/keycloak:22.0.4
     command: [ "start-dev", "--import-realm" ]
     environment:
       DB_VENDOR: MYSQL
