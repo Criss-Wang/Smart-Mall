@@ -1,6 +1,9 @@
 package com.crisswang.order.service;
 
+import brave.Span;
+import brave.Tracer;
 import com.crisswang.order.dto.InventoryResponse;
+import com.crisswang.order.dto.OrderDto;
 import com.crisswang.order.dto.OrderLineItemsDto;
 import com.crisswang.order.dto.OrderRequest;
 import com.crisswang.order.event.OrderPlacedEvent;
@@ -12,6 +15,7 @@ import io.micrometer.observation.ObservationRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -28,8 +32,8 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final WebClient.Builder webClientBuilder;
-    private final ObservationRegistry observationRegistry;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final Tracer tracer;
+    private final KafkaTemplate<String, OrderDto> kafkaTemplate;
 
     public String placeOrder(OrderRequest orderRequest) {
         Order order = new Order();
@@ -46,12 +50,13 @@ public class OrderService {
                 .map(OrderLineItems::getSkuCode)
                 .toList();
 
-        // Call Inventory Service, and place order if product is in
-        // stock
-        Observation inventoryServiceObservation = Observation.createNotStarted("inventory-service-lookup",
-                this.observationRegistry);
-        inventoryServiceObservation.lowCardinalityKeyValue("call", "inventory-service");
-        return inventoryServiceObservation.observe(() -> {
+        log.info("Calling inventory service");
+
+        Span inventoryServiceLookup = tracer.nextSpan().name("InventoryServiceLookup");
+
+        try (Tracer.SpanInScope spanInScope = tracer.withSpanInScope(inventoryServiceLookup.start())) {
+            // Call Inventory Service, and place order if product is in
+            // stock
             InventoryResponse[] inventoryResponseArray = webClientBuilder.build().get()
                     .uri("http://inventory-service/api/inventory",
                             uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
@@ -64,14 +69,14 @@ public class OrderService {
 
             if (allProductsInStock) {
                 orderRepository.save(order);
-                // publish Order Placed Event
-                applicationEventPublisher.publishEvent(new OrderPlacedEvent(this, order.getOrderNumber()));
-                return "Order Placed";
+                kafkaTemplate.send("notificationTopic", new OrderDto(order.getOrderNumber()));
+                return "Order Placed Successfully";
             } else {
                 throw new IllegalArgumentException("Product is not in stock, please try again later");
             }
-        });
-
+        } finally {
+            inventoryServiceLookup.finish();
+        }
     }
 
     private OrderLineItems mapToDto(OrderLineItemsDto orderLineItemsDto) {
