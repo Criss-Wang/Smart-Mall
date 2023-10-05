@@ -8,7 +8,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.0.5</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
 
     <groupId>com.crisswang</groupId>
@@ -21,7 +21,7 @@
         <module>inventory-service</module>
         <module>discovery-server</module>
         <module>api-gateway</module>
-<!--        <module>notification-service</module>-->
+        <module>notification-service</module>
     </modules>
 
     <properties>
@@ -84,17 +84,17 @@
                         <image>eclipse-temurin:17.0.4.1_1-jre</image>
                     </from>
                     <to>
-                        <image>microservices-tutorial/${project.artifactId}</image>
+                        <image>registry.hub.docker.com/djjwzl/${project.artifactId}</image>
                     </to>
                 </configuration>
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <phase>package</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>dockerBuild</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>dockerBuild</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

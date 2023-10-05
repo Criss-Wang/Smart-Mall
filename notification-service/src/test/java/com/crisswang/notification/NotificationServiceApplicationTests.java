@@ -1,4 +1,4 @@
-package com.crisswang.notificationservice;
+package com.crisswang.notification;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

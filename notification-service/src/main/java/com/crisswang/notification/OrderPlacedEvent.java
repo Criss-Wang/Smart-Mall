@@ -1,4 +1,4 @@
-package com.crisswang.notificationservice;
+package com.crisswang.notification;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
